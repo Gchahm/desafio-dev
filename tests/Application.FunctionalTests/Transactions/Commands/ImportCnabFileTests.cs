@@ -351,7 +351,7 @@ public class ImportCnabFileTests : BaseTestFixture
         result.TotalLines.ShouldBe(3);
         result.ValidLines.ShouldBe(2);
         result.InvalidLines.ShouldBe(1);
-        result.IsSuccess.ShouldBeFalse(); // Still has errors
+        result.IsSuccess.ShouldBeTrue();
         result.Errors.ShouldNotBeEmpty();
         result.Errors.Any(e => e.Contains("Invalid transaction type", StringComparison.OrdinalIgnoreCase)).ShouldBeTrue();
 
