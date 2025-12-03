@@ -1,5 +1,8 @@
 # Desafio Dev
 
+[![Tests](https://github.com/gchahm/desafio-dev/actions/workflows/tests.yml/badge.svg)](https://github.com/gchahm/desafio-dev/actions/workflows/tests.yml)
+[![codecov](https://codecov.io/gh/gchahm/desafio-dev/branch/main/graph/badge.svg)](https://codecov.io/gh/gchahm/desafio-dev)
+
 This repository was created using the template from [jasontaylordev/CleanArchitecture](https://github.com/jasontaylordev/CleanArchitecture)
 
 ## Development
