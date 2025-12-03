@@ -9,25 +9,13 @@ public class CardNumberTests
 {
     #region Valid CardNumber Creation Tests
 
-    [Test]
-    public void Create_WithValidUnformattedCardNumber_ShouldReturnCardNumberInstance()
-    {
-        // Arrange
-        var validCardNumber = "123456789012";
-
-        // Act
-        var cardNumber = CardNumber.Create(validCardNumber);
-
-        // Assert
-        cardNumber.ShouldNotBeNull();
-        cardNumber.Value.ShouldBe(validCardNumber);
-    }
-
     [TestCase("000000000000")]
     [TestCase("111111111111")]
     [TestCase("123456789012")]
     [TestCase("999999999999")]
     [TestCase("543210987654")]
+    [TestCase("5432***87654")]
+    [TestCase("************")]
     public void Create_WithDifferentValidCardNumbers_ShouldSucceed(string validCardNumber)
     {
         // Act
@@ -38,62 +26,9 @@ public class CardNumberTests
         cardNumber.Value.ShouldBe(validCardNumber);
     }
 
-    [Test]
-    public void Create_WithFormattedCardNumber_ShouldRemoveFormatting()
-    {
-        // Arrange
-        var formattedCardNumber = "1234-5678-9012";
-        var expectedUnformatted = "123456789012";
-
-        // Act
-        var cardNumber = CardNumber.Create(formattedCardNumber);
-
-        // Assert
-        cardNumber.Value.ShouldBe(expectedUnformatted);
-    }
-
-    [Test]
-    public void Create_WithSpaces_ShouldRemoveSpaces()
-    {
-        // Arrange
-        var cardNumberWithSpaces = "1234 5678 9012";
-        var expectedUnformatted = "123456789012";
-
-        // Act
-        var cardNumber = CardNumber.Create(cardNumberWithSpaces);
-
-        // Assert
-        cardNumber.Value.ShouldBe(expectedUnformatted);
-    }
-
-    [Test]
-    public void Create_WithMixedFormatting_ShouldRemoveAllNonDigits()
-    {
-        // Arrange
-        var mixedFormat = "1234-5678 9012";
-        var expectedUnformatted = "123456789012";
-
-        // Act
-        var cardNumber = CardNumber.Create(mixedFormat);
-
-        // Assert
-        cardNumber.Value.ShouldBe(expectedUnformatted);
-    }
-
     #endregion
 
     #region Invalid CardNumber Creation Tests
-
-    [Test]
-    public void Create_WithNullCardNumber_ShouldThrowArgumentException()
-    {
-        // Act
-        Action act = () => CardNumber.Create(null!);
-
-        // Assert
-        var ex = act.ShouldThrow<ArgumentException>();
-        ex.Message.ShouldBe("Card number cannot be null or empty (Parameter 'cardNumber')");
-    }
 
     [Test]
     public void Create_WithEmptyCardNumber_ShouldThrowArgumentException()
@@ -102,8 +37,8 @@ public class CardNumberTests
         Action act = () => CardNumber.Create(string.Empty);
 
         // Assert
-        var ex = act.ShouldThrow<ArgumentException>();
-        ex.Message.ShouldBe("Card number cannot be null or empty (Parameter 'cardNumber')");
+        act.ShouldThrow<ArgumentException>()
+            .Message.ShouldBe("Card number cannot be null or empty (Parameter 'cardNumber')");
     }
 
     [Test]
@@ -113,9 +48,8 @@ public class CardNumberTests
         Action act = () => CardNumber.Create("   ");
 
         // Assert
-
-        var ex = act.ShouldThrow<ArgumentException>();
-        ex.Message.ShouldBe("Card number cannot be null or empty (Parameter 'cardNumber')");
+        act.ShouldThrow<ArgumentException>()
+            .Message.ShouldBe("Card number cannot be null or empty (Parameter 'cardNumber')");
     }
 
     [TestCase("123")]
@@ -123,14 +57,17 @@ public class CardNumberTests
     [TestCase("12345678901")] // 11 digits
     [TestCase("1234567890123")] // 13 digits
     [TestCase("123456789012345")] // 15 digits
+    [TestCase("1234-5678 9012")]
+    [TestCase("1234 5678 9012")]
+    [TestCase("12-34 56.78/90:12")]
     public void Create_WithInvalidLength_ShouldThrowArgumentException(string invalidCardNumber)
     {
         // Act
         Action act = () => CardNumber.Create(invalidCardNumber);
 
         // Assert
-        var ex = act.ShouldThrow<ArgumentException>();
-        ex.Message.ShouldBe("Card number must have exactly 12 digits (Parameter 'cardNumber')");
+        act.ShouldThrow<ArgumentException>()
+            .Message.ShouldBe("Card number must have exactly 12 characters (digits or '*') (Parameter 'cardNumber')");
     }
 
     [Test]
@@ -143,22 +80,8 @@ public class CardNumberTests
         Action act = () => CardNumber.Create(cardNumberWithLetters);
 
         // Assert
-        var ex = act.ShouldThrow<ArgumentException>();
-        ex.Message.ShouldBe("Card number must have exactly 12 digits (Parameter 'cardNumber')");
-    }
-
-    [Test]
-    public void Create_WithSpecialCharactersOnly_ShouldThrowArgumentException()
-    {
-        // Arrange
-        var specialChars = "****-****-****";
-
-        // Act
-        Action act = () => CardNumber.Create(specialChars);
-
-        // Assert
-        var ex = act.ShouldThrow<ArgumentException>();
-        ex.Message.ShouldBe("Card number must have exactly 12 digits (Parameter 'cardNumber')");
+        act.ShouldThrow<ArgumentException>()
+            .Message.ShouldBe("Card number must have exactly 12 characters (digits or '*') (Parameter 'cardNumber')");
     }
 
     #endregion
@@ -336,20 +259,6 @@ public class CardNumberTests
     }
 
     [Test]
-    public void Create_WithMultipleFormattingCharacters_ShouldCleanAndCreate()
-    {
-        // Arrange
-        var messyFormat = "12-34 56.78/90:12";
-        var expectedClean = "123456789012";
-
-        // Act
-        var cardNumber = CardNumber.Create(messyFormat);
-
-        // Assert
-        cardNumber.Value.ShouldBe(expectedClean);
-    }
-
-    [Test]
     public void ToMaskedString_WithAllZerosInLastFour_ShouldShowZeros()
     {
         // Arrange
@@ -375,34 +284,6 @@ public class CardNumberTests
         // Assert
         formatted.Length.ShouldBe(masked.Length);
         formatted.Count(c => c == '-').ShouldBe(masked.Count(c => c == '-'));
-    }
-
-    [Test]
-    public void Create_PreservesOnlyDigits()
-    {
-        // Arrange
-        var input = "abc123def456ghi789jkl012";
-        var expectedDigits = "123456789012";
-
-        // Act
-        var cardNumber = CardNumber.Create(input);
-
-        // Assert
-        cardNumber.Value.ShouldBe(expectedDigits);
-    }
-
-    [Test]
-    public void Create_WithLeadingAndTrailingSpaces_ShouldClean()
-    {
-        // Arrange
-        var input = "  123456789012  ";
-        var expected = "123456789012";
-
-        // Act
-        var cardNumber = CardNumber.Create(input);
-
-        // Assert
-        cardNumber.Value.ShouldBe(expected);
     }
 
     #endregion

@@ -20,8 +20,11 @@ public sealed class CardNumber
         if (string.IsNullOrWhiteSpace(cardNumber))
             throw new ArgumentException("Card number cannot be null or empty", nameof(cardNumber));
 
-        if (cardNumber.Length != 12)
-            throw new ArgumentException("Card number must have exactly 12 digits", nameof(cardNumber));
+        // Ensure only digits or the special character '*'
+        if (cardNumber.Length != 12 || cardNumber.Any(ch => !char.IsDigit(ch) && ch != '*'))
+        {
+            throw new ArgumentException("Card number must have exactly 12 characters (digits or '*')", nameof(cardNumber));
+        }
 
         return new CardNumber(cardNumber);
     }
