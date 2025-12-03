@@ -42,12 +42,35 @@ public class FinancialTransaction : BaseEntity
     /// <summary>
     /// Nature of the transaction (Income or Expense)
     /// </summary>
-    public TransactionNature Nature { get; set; }
+    public TransactionNature Nature => Type switch
+    {
+        TransactionType.Debit => TransactionNature.Income,
+        TransactionType.Boleto or TransactionType.Financing => TransactionNature.Expense,
+        TransactionType.Credit => TransactionNature.Income,
+        TransactionType.LoanReceipt => TransactionNature.Income,
+        TransactionType.Sales => TransactionNature.Income,
+        TransactionType.TedReceipt => TransactionNature.Income,
+        TransactionType.DocReceipt => TransactionNature.Income,
+        TransactionType.Rent => TransactionNature.Expense,
+        _ => throw new ArgumentException($"Invalid transaction type: {Type}", nameof(Type))
+    };
 
     /// <summary>
     /// Description of the transaction type
     /// </summary>
-    public string Description { get; set; } = string.Empty;
+    public string Description => Type switch
+    {
+        TransactionType.Debit => "Debit",
+        TransactionType.Boleto => "Boleto",
+        TransactionType.Financing => "Financing",
+        TransactionType.Credit => "Credit",
+        TransactionType.LoanReceipt => "Loan Receipt",
+        TransactionType.Sales => "Sales",
+        TransactionType.TedReceipt => "TED Receipt",
+        TransactionType.DocReceipt => "DOC Receipt",
+        TransactionType.Rent => "Rent",
+        _ => throw new ArgumentException($"Invalid transaction type: {Type}", nameof(Type))
+    };
 
     /// <summary>
     /// Foreign key to the Store
@@ -63,46 +86,6 @@ public class FinancialTransaction : BaseEntity
     /// Date and time when the transaction was created in the system
     /// </summary>
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    /// <summary>
-    /// Determines the nature of the transaction based on its type
-    /// </summary>
-    public static TransactionNature GetNatureFromType(TransactionType type)
-    {
-        return type switch
-        {
-            TransactionType.Debit => TransactionNature.Income,
-            TransactionType.Boleto => TransactionNature.Expense,
-            TransactionType.Financing => TransactionNature.Expense,
-            TransactionType.Credit => TransactionNature.Income,
-            TransactionType.LoanReceipt => TransactionNature.Income,
-            TransactionType.Sales => TransactionNature.Income,
-            TransactionType.TedReceipt => TransactionNature.Income,
-            TransactionType.DocReceipt => TransactionNature.Income,
-            TransactionType.Rent => TransactionNature.Expense,
-            _ => throw new ArgumentException($"Invalid transaction type: {type}", nameof(type))
-        };
-    }
-
-    /// <summary>
-    /// Gets the description for a transaction type
-    /// </summary>
-    public static string GetDescriptionFromType(TransactionType type)
-    {
-        return type switch
-        {
-            TransactionType.Debit => "Debit",
-            TransactionType.Boleto => "Boleto",
-            TransactionType.Financing => "Financing",
-            TransactionType.Credit => "Credit",
-            TransactionType.LoanReceipt => "Loan Receipt",
-            TransactionType.Sales => "Sales",
-            TransactionType.TedReceipt => "TED Receipt",
-            TransactionType.DocReceipt => "DOC Receipt",
-            TransactionType.Rent => "Rent",
-            _ => throw new ArgumentException($"Invalid transaction type: {type}", nameof(type))
-        };
-    }
 
     /// <summary>
     /// Gets the signed amount (positive for income, negative for expense)

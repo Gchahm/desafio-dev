@@ -7,8 +7,6 @@ using DesafioDev.Domain.ValueObjects;
 
 namespace DesafioDev.Application.Transactions.Commands.ImportCnabFile;
 
-
-
 /// <summary>
 /// Handler for ImportCnabFileCommand
 /// Orchestrates the import process: parse file, create/update stores, save transactions
@@ -180,8 +178,6 @@ public class ImportCnabFileCommandHandler(
             Amount = amount,
             Cpf = cpf,
             Card = card,
-            Nature = FinancialTransaction.GetNatureFromType(transactionType),
-            Description = FinancialTransaction.GetDescriptionFromType(transactionType),
             Store = store,
             StoreId = store.Id,
             CreatedAt = DateTime.UtcNow

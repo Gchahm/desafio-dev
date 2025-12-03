@@ -18,10 +18,6 @@ public class FinancialTransactionConfiguration : IEntityTypeConfiguration<Financ
             .IsRequired()
             .HasConversion<int>();
 
-        builder.Property(t => t.Nature)
-            .IsRequired()
-            .HasConversion<int>();
-
         // Configure Date and Time properties
         builder.Property(t => t.Date)
             .IsRequired();
@@ -53,11 +49,6 @@ public class FinancialTransactionConfiguration : IEntityTypeConfiguration<Financ
                 v => CardNumber.Create(v))
             .HasMaxLength(12)
             .IsFixedLength();
-
-        // Configure Description
-        builder.Property(t => t.Description)
-            .IsRequired()
-            .HasMaxLength(100);
 
         // Configure CreatedAt
         builder.Property(t => t.CreatedAt)
