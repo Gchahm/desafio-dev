@@ -1,5 +1,5 @@
-import { FetchData } from "./components/FetchData";
-import { Home } from "./components/Home";
+import {Home} from "./components/Home";
+import {ImportTransaction} from "./components/ImportTransaction";
 
 interface RouteConfig {
     index?: boolean;
@@ -10,11 +10,11 @@ interface RouteConfig {
 const AppRoutes: RouteConfig[] = [
     {
         index: true,
-        element: <Home />
+        element: <Home/>
     },
     {
-        path: '/fetch-data',
-        element: <FetchData />
+        path: '/import',
+        element: <ImportTransaction/>
     }
 ];
 

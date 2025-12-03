@@ -5,5 +5,87 @@
     "title": "DesafioDev API",
     "version": "1.0.0"
   },
-  "components": {}
+  "paths": {
+    "/api/Transactions/import": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "operationId": "ImportCnabFile",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CnabImportResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CnabImportResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "totalLines": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "successfulImports": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failedImports": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "storesProcessed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "isSuccess": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
 }
