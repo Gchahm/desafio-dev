@@ -1,5 +1,6 @@
 using DesafioDev.Application.Common.Models;
 using DesafioDev.Application.Transactions.Commands.ImportCnabFile;
+using DesafioDev.Application.Transactions.Queries.GetStoreTransactions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,9 +13,21 @@ public class Transactions : EndpointGroupBase
 {
     public override void Map(RouteGroupBuilder groupBuilder)
     {
+        groupBuilder.MapGet(GetStoreTransactions);
         groupBuilder.MapPost(ImportCnabFile, "import")
             .DisableAntiforgery()
             .Accepts<IFormFile>("multipart/form-data");
+    }
+
+    /// <summary>
+    /// Get all stores with their transactions and balances
+    /// </summary>
+    /// <param name="sender">MediatR sender</param>
+    /// <returns>List of stores with transactions and total balance</returns>
+    public async Task<Ok<List<StoreTransactionsDto>>> GetStoreTransactions(ISender sender)
+    {
+        var result = await sender.Send(new GetStoreTransactionsQuery());
+        return TypedResults.Ok(result);
     }
 
     /// <summary>

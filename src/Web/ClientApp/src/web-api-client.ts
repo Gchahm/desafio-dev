@@ -19,6 +19,48 @@ export class TransactionsClient {
         this.baseUrl = baseUrl ?? "";
     }
 
+    getStoreTransactions(): Promise<StoreTransactionsDto[]> {
+        let url_ = this.baseUrl + "/api/Transactions";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetStoreTransactions(_response);
+        });
+    }
+
+    protected processGetStoreTransactions(response: Response): Promise<StoreTransactionsDto[]> {
+        followIfLoginRedirect(response);
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(StoreTransactionsDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<StoreTransactionsDto[]>(null as any);
+    }
+
     importCnabFile(file: FileParameter | null | undefined): Promise<CnabImportResult> {
         let url_ = this.baseUrl + "/api/Transactions/import";
         url_ = url_.replace(/[?&]$/, "");
@@ -66,6 +108,134 @@ export class TransactionsClient {
         }
         return Promise.resolve<CnabImportResult>(null as any);
     }
+}
+
+export class StoreTransactionsDto implements IStoreTransactionsDto {
+    id?: number;
+    name?: string;
+    ownerName?: string;
+    transactions?: TransactionDto[];
+    totalBalance?: number;
+
+    constructor(data?: IStoreTransactionsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+            this.ownerName = _data["ownerName"];
+            if (Array.isArray(_data["transactions"])) {
+                this.transactions = [] as any;
+                for (let item of _data["transactions"])
+                    this.transactions!.push(TransactionDto.fromJS(item));
+            }
+            this.totalBalance = _data["totalBalance"];
+        }
+    }
+
+    static fromJS(data: any): StoreTransactionsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new StoreTransactionsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        data["ownerName"] = this.ownerName;
+        if (Array.isArray(this.transactions)) {
+            data["transactions"] = [];
+            for (let item of this.transactions)
+                data["transactions"].push(item ? item.toJSON() : undefined as any);
+        }
+        data["totalBalance"] = this.totalBalance;
+        return data;
+    }
+}
+
+export interface IStoreTransactionsDto {
+    id?: number;
+    name?: string;
+    ownerName?: string;
+    transactions?: TransactionDto[];
+    totalBalance?: number;
+}
+
+export class TransactionDto implements ITransactionDto {
+    id?: number;
+    description?: string;
+    nature?: string;
+    date?: Date;
+    time?: string;
+    signedAmount?: number;
+    cpf?: string;
+    cardNumber?: string;
+    createdAt?: Date;
+
+    constructor(data?: ITransactionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.description = _data["description"];
+            this.nature = _data["nature"];
+            this.date = _data["date"] ? new Date(_data["date"].toString()) : undefined as any;
+            this.time = _data["time"];
+            this.signedAmount = _data["signedAmount"];
+            this.cpf = _data["cpf"];
+            this.cardNumber = _data["cardNumber"];
+            this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): TransactionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new TransactionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["description"] = this.description;
+        data["nature"] = this.nature;
+        data["date"] = this.date ? this.date.toISOString() : undefined as any;
+        data["time"] = this.time;
+        data["signedAmount"] = this.signedAmount;
+        data["cpf"] = this.cpf;
+        data["cardNumber"] = this.cardNumber;
+        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : undefined as any;
+        return data;
+    }
+}
+
+export interface ITransactionDto {
+    id?: number;
+    description?: string;
+    nature?: string;
+    date?: Date;
+    time?: string;
+    signedAmount?: number;
+    cpf?: string;
+    cardNumber?: string;
+    createdAt?: Date;
 }
 
 export class CnabImportResult implements ICnabImportResult {

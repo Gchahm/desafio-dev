@@ -1,5 +1,5 @@
-import {Home} from "./components/Home";
 import {ImportTransaction} from "./components/ImportTransaction";
+import {ListTransactions} from "./components/ListTransactions";
 
 interface RouteConfig {
     index?: boolean;
@@ -10,7 +10,7 @@ interface RouteConfig {
 const AppRoutes: RouteConfig[] = [
     {
         index: true,
-        element: <Home/>
+        element: <ListTransactions/>
     },
     {
         path: '/import',

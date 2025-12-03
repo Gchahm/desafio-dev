@@ -6,6 +6,29 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/Transactions": {
+      "get": {
+        "tags": [
+          "Transactions"
+        ],
+        "operationId": "GetStoreTransactions",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StoreTransactionsDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Transactions/import": {
       "post": {
         "tags": [
@@ -55,6 +78,70 @@
   },
   "components": {
     "schemas": {
+      "StoreTransactionsDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "transactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransactionDto"
+            }
+          },
+          "totalBalance": {
+            "type": "number",
+            "format": "decimal"
+          }
+        }
+      },
+      "TransactionDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "description": {
+            "type": "string"
+          },
+          "nature": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "time": {
+            "type": "string",
+            "format": "time"
+          },
+          "signedAmount": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "cpf": {
+            "type": "string"
+          },
+          "cardNumber": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "CnabImportResult": {
         "type": "object",
         "additionalProperties": false,
