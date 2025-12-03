@@ -20,12 +20,6 @@ public class StoreRepository(ApplicationDbContext context) : IStoreRepository
         return await context.Stores.FirstOrDefaultAsync(s => s.Name == name, cancellationToken);
     }
 
-    public async Task<Store?> GetByNameAndOwnerAsync(string name, string owner, CancellationToken cancellationToken)
-    {
-        return await context.Stores
-            .FirstOrDefaultAsync(s => s.Name == name && s.OwnerName == owner, cancellationToken);
-    }
-
     public async Task AddAsync(Store store, CancellationToken cancellationToken)
     {
         await context.Stores.AddAsync(store, cancellationToken);

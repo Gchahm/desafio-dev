@@ -8,7 +8,5 @@ public interface IStoreRepository
 
     Task<Store?> GetByNameAsync(string name, CancellationToken cancellationToken);
 
-    Task<Store?> GetByNameAndOwnerAsync(string name, string owner, CancellationToken cancellationToken);
-
     Task AddAsync(Store store, CancellationToken cancellationToken);
 }
