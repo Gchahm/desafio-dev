@@ -37,7 +37,7 @@ jobs:
         run: dotnet tool install -g dotnet-reportgenerator-globaltool
 
       - name: Merge coverage reports
-        run: reportgenerator -reports:"./coverage/**/coverage.cobertura.xml" -targetdir:"./coverage/merged" -reporttypes:"Cobertura"
+        run: reportgenerator -reports:"./coverage/**/coverage.cobertura.xml" -targetdir:"./coverage/merged" -reporttypes:"Cobertura" -classfilters:"-DesafioDev.Infrastructure.Migrations.*;-DesafioDev.Infrastructure.Data.ApplicationDbContextModelSnapshot;-DesafioDev.Infrastructure.Data.ApplicationDbContextInitialiser;-DesafioDev.Infrastructure.Data.InitialiserExtensions;-DesafioDev.Web.Program;-DesafioDev.Web.Pages.*;-System.Runtime.CompilerServices.*;-Microsoft.AspNetCore.OpenApi.Generated"
 
       - name: Code Coverage Report
         uses: irongut/CodeCoverageSummary@v1.3.0
