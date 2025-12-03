@@ -34,8 +34,6 @@ public class CreateTodoListTests : BaseTestFixture
     [Test]
     public async Task ShouldCreateTodoList()
     {
-        var userId = await RunAsDefaultUserAsync();
-
         var command = new CreateTodoListCommand
         {
             Title = "Tasks"
@@ -47,7 +45,6 @@ public class CreateTodoListTests : BaseTestFixture
 
         list.ShouldNotBeNull();
         list!.Title.ShouldBe(command.Title);
-        list.CreatedBy.ShouldBe(userId);
         list.Created.ShouldBe(DateTime.Now, TimeSpan.FromMilliseconds(10000));
     }
 }

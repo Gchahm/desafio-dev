@@ -1,11 +1,7 @@
 ﻿using DesafioDev.Application.Common.Interfaces;
-using DesafioDev.Application.Common.Security;
-using DesafioDev.Domain.Constants;
 
 namespace DesafioDev.Application.TodoLists.Commands.PurgeTodoLists;
 
-[Authorize(Roles = Roles.Administrator)]
-[Authorize(Policy = Policies.CanPurge)]
 public record PurgeTodoListsCommand : IRequest;
 
 public class PurgeTodoListsCommandHandler : IRequestHandler<PurgeTodoListsCommand>

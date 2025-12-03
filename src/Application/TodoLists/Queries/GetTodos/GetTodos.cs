@@ -1,11 +1,9 @@
 ﻿using DesafioDev.Application.Common.Interfaces;
 using DesafioDev.Application.Common.Models;
-using DesafioDev.Application.Common.Security;
 using DesafioDev.Domain.Enums;
 
 namespace DesafioDev.Application.TodoLists.Queries.GetTodos;
 
-[Authorize]
 public record GetTodosQuery : IRequest<TodosVm>;
 
 public class GetTodosQueryHandler : IRequestHandler<GetTodosQuery, TodosVm>

@@ -33,15 +33,6 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         builder.ConfigureTestServices(services =>
         {
             services
-                .RemoveAll<IUser>()
-                .AddTransient(provider =>
-                {
-                    var mock = new Mock<IUser>();
-                    mock.SetupGet(x => x.Roles).Returns(GetRoles());
-                    mock.SetupGet(x => x.Id).Returns(GetUserId());
-                    return mock.Object;
-                });
-            services
                 .RemoveAll<DbContextOptions<ApplicationDbContext>>()
                 .AddDbContext<ApplicationDbContext>((sp, options) =>
                 {

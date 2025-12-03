@@ -44,8 +44,6 @@ public class UpdateTodoListTests : BaseTestFixture
     [Test]
     public async Task ShouldUpdateTodoList()
     {
-        var userId = await RunAsDefaultUserAsync();
-
         var listId = await SendAsync(new CreateTodoListCommand
         {
             Title = "New List"
@@ -63,8 +61,6 @@ public class UpdateTodoListTests : BaseTestFixture
 
         list.ShouldNotBeNull();
         list!.Title.ShouldBe(command.Title);
-        list.LastModifiedBy.ShouldNotBeNull();
-        list.LastModifiedBy.ShouldBe(userId);
         list.LastModified.ShouldBe(DateTime.Now, TimeSpan.FromMilliseconds(10000));
     }
 }

@@ -1,7 +1,5 @@
 ﻿using Azure.Identity;
-using DesafioDev.Application.Common.Interfaces;
 using DesafioDev.Infrastructure.Data;
-using DesafioDev.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -12,8 +10,6 @@ public static class DependencyInjection
     public static void AddWebServices(this IHostApplicationBuilder builder)
     {
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-        builder.Services.AddScoped<IUser, CurrentUser>();
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddHealthChecks()
