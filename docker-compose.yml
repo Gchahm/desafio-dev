@@ -1,0 +1,52 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: desafiodev-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: DesafioDevDb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d DesafioDevDb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - desafiodev-network
+
+  web:
+    build:
+      context: .
+      dockerfile: src/Web/Dockerfile
+    container_name: desafiodev-web
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DesafioDevDb=Server=db;Port=5432;Database=DesafioDevDb;Username=admin;Password=password;
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - desafiodev-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  desafiodev-network:
+    driver: bridge
