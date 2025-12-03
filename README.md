@@ -1,7 +1,7 @@
 # Desafio Dev
 
 [![Tests](https://github.com/gchahm/desafio-dev/actions/workflows/tests.yml/badge.svg)](https://github.com/gchahm/desafio-dev/actions/workflows/tests.yml)
-[![codecov](https://codecov.io/gh/gchahm/desafio-dev/branch/main/graph/badge.svg)](https://codecov.io/gh/gchahm/desafio-dev)
+[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/gchahm/GIST_ID/raw/desafio-dev-coverage.json)](https://github.com/gchahm/desafio-dev/actions/workflows/tests.yml)
 
 This repository was created using the template from [jasontaylordev/CleanArchitecture](https://github.com/jasontaylordev/CleanArchitecture)
 

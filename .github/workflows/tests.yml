@@ -37,7 +37,7 @@ jobs:
         run: dotnet tool install -g dotnet-reportgenerator-globaltool
 
       - name: Merge coverage reports
-        run: reportgenerator -reports:"./coverage/**/coverage.cobertura.xml" -targetdir:"./coverage/merged" -reporttypes:"Cobertura" -classfilters:"-DesafioDev.Infrastructure.Migrations.*;-DesafioDev.Infrastructure.Data.ApplicationDbContextModelSnapshot;-DesafioDev.Infrastructure.Data.ApplicationDbContextInitialiser;-DesafioDev.Infrastructure.Data.InitialiserExtensions;-DesafioDev.Web.Program;-DesafioDev.Web.Pages.*;-System.Runtime.CompilerServices.*;-Microsoft.AspNetCore.OpenApi.Generated"
+        run: reportgenerator -reports:"./coverage/**/coverage.cobertura.xml" -targetdir:"./coverage/merged" -reporttypes:"Cobertura;OpenCover" -classfilters:"-DesafioDev.Infrastructure.Migrations.*;-DesafioDev.Infrastructure.Data.ApplicationDbContextModelSnapshot;-DesafioDev.Infrastructure.Data.ApplicationDbContextInitialiser;-DesafioDev.Infrastructure.Data.InitialiserExtensions;-DesafioDev.Web.Program;-DesafioDev.Web.Pages.*;-System.Runtime.CompilerServices.*;-Microsoft.AspNetCore.OpenApi.Generated"
 
       - name: Code Coverage Report
         uses: irongut/CodeCoverageSummary@v1.3.0
@@ -59,9 +59,13 @@ jobs:
           recreate: true
           path: code-coverage-results.md
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+      - name: Create Coverage Badge
+        uses: simon-k/dotnet-code-coverage-badge@v1.0.0
+        if: github.ref == 'refs/heads/main'
         with:
-          files: ./coverage/merged/Cobertura.xml
-          fail_ci_if_error: false
-          verbose: true
+          label: coverage
+          color: brightgreen
+          path: coverage/merged/coverage.opencover.xml
+          gist-filename: desafio-dev-code-coverage.json
+          gist-id: ${{ secrets.GIST_ID }}
+          gist-auth-token: ${{ secrets.GIST_AUTH_TOKEN }}
