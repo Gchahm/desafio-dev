@@ -65,7 +65,7 @@ jobs:
         with:
           label: coverage
           color: brightgreen
-          path: coverage/merged/coverage.opencover.xml
+          path: coverage/merged/Cobertura.xml
           gist-filename: desafio-dev-code-coverage.json
           gist-id: ${{ secrets.GIST_ID }}
           gist-auth-token: ${{ secrets.GIST_AUTH_TOKEN }}
