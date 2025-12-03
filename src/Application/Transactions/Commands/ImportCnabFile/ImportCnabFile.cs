@@ -1,9 +1,10 @@
 using DesafioDev.Application.Common.Interfaces;
+using DesafioDev.Application.Common.Interfaces.Repositories;
 using DesafioDev.Application.Common.Models;
 using DesafioDev.Domain.Entities;
 using DesafioDev.Domain.Enums;
 using DesafioDev.Domain.ValueObjects;
-using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace DesafioDev.Application.Transactions.Commands.ImportCnabFile;
 
@@ -28,7 +29,9 @@ public record ImportCnabFileCommand : IRequest<CnabImportResult>
 /// Orchestrates the import process: parse file, create/update stores, save transactions
 /// </summary>
 public class ImportCnabFileCommandHandler(
-    IApplicationDbContext context,
+    IStoreRepository stores,
+    IFinancialTransactionRepository transactions,
+    IUnitOfWork uow,
     ICnabFileParser parser) : IRequestHandler<ImportCnabFileCommand, CnabImportResult>
 {
     public async Task<CnabImportResult> Handle(
@@ -80,7 +83,7 @@ public class ImportCnabFileCommandHandler(
                         try
                         {
                             var transaction = CreateTransaction(lineData, store);
-                            context.FinancialTransactions.Add(transaction);
+                            await transactions.AddAsync(transaction, cancellationToken);
                             result = result with { SuccessfulImports = result.SuccessfulImports + 1 };
                         }
                         catch (Exception ex)
@@ -109,7 +112,7 @@ public class ImportCnabFileCommandHandler(
             // Save all changes to database
             if (result.SuccessfulImports > 0)
             {
-                await context.SaveChangesAsync(cancellationToken);
+                await uow.SaveChangesAsync(cancellationToken);
             }
 
             return result;
@@ -134,8 +137,7 @@ public class ImportCnabFileCommandHandler(
         CancellationToken cancellationToken)
     {
         // Try to find existing store by name
-        var store = await context.Stores
-            .FirstOrDefaultAsync(s => s.Name == storeName, cancellationToken);
+        var store = await stores.GetByNameAsync(storeName, cancellationToken);
 
         if (store == null)
         {
@@ -146,10 +148,10 @@ public class ImportCnabFileCommandHandler(
                 OwnerName = storeOwner
             };
 
-            context.Stores.Add(store);
+            await stores.AddAsync(store, cancellationToken);
 
             // Save to get the store ID immediately
-            await context.SaveChangesAsync(cancellationToken);
+            await uow.SaveChangesAsync(cancellationToken);
         }
         else if (store.OwnerName != storeOwner)
         {

@@ -1,4 +1,4 @@
-using DesafioDev.Application.Common.Interfaces;
+using DesafioDev.Application.Common.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace DesafioDev.Application.Transactions.Queries.GetStoreTransactions;
@@ -11,7 +11,7 @@ public record GetStoreTransactionsQuery : IRequest<List<StoreTransactionsDto>>;
 /// <summary>
 /// Handler for GetStoreTransactionsQuery
 /// </summary>
-public class GetStoreTransactionsQueryHandler(IApplicationDbContext context)
+public class GetStoreTransactionsQueryHandler(IStoreRepository stores)
     : IRequestHandler<GetStoreTransactionsQuery, List<StoreTransactionsDto>>
 {
     public async Task<List<StoreTransactionsDto>> Handle(
@@ -19,13 +19,10 @@ public class GetStoreTransactionsQueryHandler(IApplicationDbContext context)
         CancellationToken cancellationToken)
     {
         // Get all stores with their transactions
-        var stores = await context.Stores
-            .Include(s => s.Transactions)
-            .OrderBy(s => s.Name)
-            .ToListAsync(cancellationToken);
+        var storeEntities = await stores.GetAllWithTransactionsAsync(cancellationToken);
 
         // Map to DTOs
-        var result = stores.Select(store => new StoreTransactionsDto
+        var result = storeEntities.Select(store => new StoreTransactionsDto
         {
             Id = store.Id,
             Name = store.Name,

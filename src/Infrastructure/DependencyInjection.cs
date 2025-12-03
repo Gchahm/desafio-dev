@@ -1,6 +1,8 @@
 ﻿using DesafioDev.Application.Common.Interfaces;
 using DesafioDev.Infrastructure.Data;
 using DesafioDev.Infrastructure.Data.Interceptors;
+using DesafioDev.Infrastructure.Repositories;
+using DesafioDev.Application.Common.Interfaces.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -28,6 +30,11 @@ public static class DependencyInjection
 
 
         builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
+        builder.Services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationDbContext>());
+
+        // Repositories
+        builder.Services.AddScoped<IStoreRepository, StoreRepository>();
+        builder.Services.AddScoped<IFinancialTransactionRepository, FinancialTransactionRepository>();
 
         builder.Services.AddScoped<ApplicationDbContextInitialiser>();
         
