@@ -92,3 +92,20 @@ Spin up the full stack with Docker (Web + DB):
 ```bash
 docker compose up
 ```
+
+## API docs (Swagger / OpenAPI)
+
+You can explore the API using Swagger UI or the raw OpenAPI specification:
+
+- When running with the .NET CLI on your host:
+  - Swagger UI: https://localhost:44447/api/
+  - Raw spec (JSON): https://localhost:44447/api/specification.json
+
+- When running with Docker Compose (default web port 8080):
+  - Swagger UI: http://localhost:8080/api/
+  - Raw spec (JSON): http://localhost:8080/api/specification.json
+
+- From the repository (without running the app):
+  - Open the static file at `src/Web/wwwroot/api/specification.json`.
+
+Tip: If your local port differs (e.g., due to `launchSettings.json` changes), check the application startup output for the exact URLs and replace the port accordingly.
