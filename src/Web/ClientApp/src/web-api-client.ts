@@ -19,7 +19,7 @@ export class TransactionsClient {
         this.baseUrl = baseUrl ?? "";
     }
 
-    getStoreTransactions(): Promise<StoreTransactionsDto[]> {
+    getStoreTransactions(): Promise<StoreDto[]> {
         let url_ = this.baseUrl + "/api/Transactions";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -35,7 +35,7 @@ export class TransactionsClient {
         });
     }
 
-    protected processGetStoreTransactions(response: Response): Promise<StoreTransactionsDto[]> {
+    protected processGetStoreTransactions(response: Response): Promise<StoreDto[]> {
         followIfLoginRedirect(response);
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
@@ -46,7 +46,7 @@ export class TransactionsClient {
             if (Array.isArray(resultData200)) {
                 result200 = [] as any;
                 for (let item of resultData200)
-                    result200!.push(StoreTransactionsDto.fromJS(item));
+                    result200!.push(StoreDto.fromJS(item));
             }
             else {
                 result200 = null as any;
@@ -58,7 +58,7 @@ export class TransactionsClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<StoreTransactionsDto[]>(null as any);
+        return Promise.resolve<StoreDto[]>(null as any);
     }
 
     importCnabFile(file: FileParameter | null | undefined): Promise<CnabImportResult> {
@@ -110,14 +110,14 @@ export class TransactionsClient {
     }
 }
 
-export class StoreTransactionsDto implements IStoreTransactionsDto {
+export class StoreDto implements IStoreDto {
     id?: number;
     name?: string;
     ownerName?: string;
     transactions?: TransactionDto[];
     totalBalance?: number;
 
-    constructor(data?: IStoreTransactionsDto) {
+    constructor(data?: IStoreDto) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -140,9 +140,9 @@ export class StoreTransactionsDto implements IStoreTransactionsDto {
         }
     }
 
-    static fromJS(data: any): StoreTransactionsDto {
+    static fromJS(data: any): StoreDto {
         data = typeof data === 'object' ? data : {};
-        let result = new StoreTransactionsDto();
+        let result = new StoreDto();
         result.init(data);
         return result;
     }
@@ -162,7 +162,7 @@ export class StoreTransactionsDto implements IStoreTransactionsDto {
     }
 }
 
-export interface IStoreTransactionsDto {
+export interface IStoreDto {
     id?: number;
     name?: string;
     ownerName?: string;

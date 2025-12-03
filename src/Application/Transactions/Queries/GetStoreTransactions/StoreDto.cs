@@ -1,9 +1,11 @@
+using DesafioDev.Domain.Entities;
+
 namespace DesafioDev.Application.Transactions.Queries.GetStoreTransactions;
 
 /// <summary>
 /// DTO representing a store with its transactions and balance
 /// </summary>
-public class StoreTransactionsDto
+public class StoreDto
 {
     /// <summary>
     /// Store ID
@@ -29,6 +31,17 @@ public class StoreTransactionsDto
     /// Total balance (sum of all transactions: income - expense)
     /// </summary>
     public decimal TotalBalance { get; init; }
+
+    public static StoreDto FromEntity(Store store) => new()
+    {
+        Id = store.Id,
+        Name = store.Name,
+        OwnerName = store.OwnerName,
+        Transactions = store.Transactions
+            .OrderByDescending(t => t.Date)
+            .ThenByDescending(t => t.Time)
+            .Select(TransactionDto.FromEntity)
+            .ToList(),
+        TotalBalance = store.Transactions.Sum(t => t.GetSignedAmount())
+    };
 }
-
-

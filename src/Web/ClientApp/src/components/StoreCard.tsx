@@ -1,10 +1,10 @@
-import {StoreTransactionsDto} from "../web-api-client";
+import {StoreDto} from "../web-api-client";
 import {Card, Table} from "reactstrap";
 import {Money} from "./Money";
 
 
 export interface StoreProps {
-    store: StoreTransactionsDto;
+    store: StoreDto;
 }
 
 export const StoreCard = (props: StoreProps) => {

@@ -1,12 +1,12 @@
 import {ListGroup, ListGroupItem} from "reactstrap";
 import React from "react";
-import {StoreTransactionsDto} from "../web-api-client";
+import {StoreDto} from "../web-api-client";
 import {Money} from "./Money";
 
 interface StoreListProps {
-    stores: StoreTransactionsDto[];
-    selectedStore: StoreTransactionsDto | null;
-    setSelectedStore: (store: StoreTransactionsDto) => void;
+    stores: StoreDto[];
+    selectedStore: StoreDto | null;
+    setSelectedStore: (store: StoreDto) => void;
 }
 
 export const StoreList = (props: StoreListProps) => {

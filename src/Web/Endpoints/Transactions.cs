@@ -24,7 +24,7 @@ public class Transactions : EndpointGroupBase
     /// </summary>
     /// <param name="sender">MediatR sender</param>
     /// <returns>List of stores with transactions and total balance</returns>
-    public async Task<Ok<List<StoreTransactionsDto>>> GetStoreTransactions(ISender sender)
+    public async Task<Ok<List<StoreDto>>> GetStoreTransactions(ISender sender)
     {
         var result = await sender.Send(new GetStoreTransactionsQuery());
         return TypedResults.Ok(result);

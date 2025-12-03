@@ -1,3 +1,5 @@
+using DesafioDev.Domain.Entities;
+
 namespace DesafioDev.Application.Transactions.Queries.GetStoreTransactions;
 
 /// <summary>
@@ -49,4 +51,16 @@ public class TransactionDto
     /// Date and time when imported
     /// </summary>
     public DateTime CreatedAt { get; init; }
+
+    public static TransactionDto FromEntity(FinancialTransaction t) => new()
+    {
+        Id = t.Id,
+        Description = t.Description,
+        Nature = t.Nature.ToString(),
+        Date = t.Date.ToDateTime(t.Time),
+        SignedAmount = t.GetSignedAmount(),
+        Cpf = t.Cpf.ToFormattedString(),
+        CardNumber = t.Card.ToMaskedString(),
+        CreatedAt = t.CreatedAt
+    };
 }

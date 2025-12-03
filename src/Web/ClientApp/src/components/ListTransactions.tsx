@@ -1,21 +1,14 @@
 import React from 'react';
-import {CnabImportResult, StoreTransactionsDto, TransactionsClient} from '../web-api-client';
+import {CnabImportResult, StoreDto, TransactionsClient} from '../web-api-client';
 import {StoreCard} from "./StoreCard";
 import {StoreList} from "./StoreList";
-
-interface ImportTransactionState {
-    selectedFile: File | null;
-    uploading: boolean;
-    result: CnabImportResult | null;
-    error: string | null;
-}
 
 const client = new TransactionsClient();
 
 export const ListTransactions = () => {
 
-    const [stores, setStores] = React.useState<StoreTransactionsDto[]>([]);
-    const [selectedStore, setSelectedStore] = React.useState<StoreTransactionsDto | null>(null);
+    const [stores, setStores] = React.useState<StoreDto[]>([]);
+    const [selectedStore, setSelectedStore] = React.useState<StoreDto | null>(null);
 
     React.useEffect(() => {
         client.getStoreTransactions().then((res) => {

@@ -20,7 +20,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/StoreTransactionsDto"
+                    "$ref": "#/components/schemas/StoreDto"
                   }
                 }
               }
@@ -78,7 +78,7 @@
   },
   "components": {
     "schemas": {
-      "StoreTransactionsDto": {
+      "StoreDto": {
         "type": "object",
         "additionalProperties": false,
         "properties": {

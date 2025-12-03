@@ -4,25 +4,10 @@ using DesafioDev.Application.Common.Models;
 using DesafioDev.Domain.Entities;
 using DesafioDev.Domain.Enums;
 using DesafioDev.Domain.ValueObjects;
-using System;
 
 namespace DesafioDev.Application.Transactions.Commands.ImportCnabFile;
 
-/// <summary>
-/// Command to import a CNAB file
-/// </summary>
-public record ImportCnabFileCommand : IRequest<CnabImportResult>
-{
-    /// <summary>
-    /// The CNAB file stream to import
-    /// </summary>
-    public Stream FileStream { get; init; } = null!;
 
-    /// <summary>
-    /// Original filename (for logging/tracking purposes)
-    /// </summary>
-    public string FileName { get; init; } = string.Empty;
-}
 
 /// <summary>
 /// Handler for ImportCnabFileCommand
