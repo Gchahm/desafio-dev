@@ -19,7 +19,7 @@ export const StoreCard = (props: StoreProps) => {
                     <th>Horario</th>
                     <th>Tipo</th>
                     <th>CPF</th>
-                    <th>Cartao</th>
+                    <th>Cartão</th>
                     <th className="text-end">Valor</th>
                 </tr>
                 </thead>

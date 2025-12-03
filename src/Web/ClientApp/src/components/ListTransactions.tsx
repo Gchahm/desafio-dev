@@ -22,7 +22,7 @@ export const ListTransactions = () => {
 
     return (
         <div className="container-fluid">
-            <h1 className="mb-4">Transactions</h1>
+            <h1 className="mb-4">Lojas</h1>
             <div className="row">
                 <div className="col-12 col-md-4 col-lg-3 mb-3">
                     <StoreList stores={stores} selectedStore={selectedStore} setSelectedStore={setSelectedStore}/>

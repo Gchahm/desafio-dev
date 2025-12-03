@@ -55,12 +55,11 @@ export const ImportTransaction = () => {
 
     return (
         <div>
-            <h1>Import CNAB File</h1>
-            <p>Upload a CNAB file to import financial transactions.</p>
+            <h1>Importar arquivo CNAB</h1>
 
             <Form onSubmit={handleSubmit}>
                 <FormGroup>
-                    <Label for="fileInput">Select CNAB File</Label>
+                    <Label for="fileInput">Selecione o arquivo CNAB</Label>
                     <Input
                         id="fileInput"
                         type="file"
@@ -83,7 +82,7 @@ export const ImportTransaction = () => {
                             onChange={handleIgnoreErrorsChange}
                             disabled={mutation.isPending}
                         />{' '}
-                        Ignore validation errors during import
+                       Ignorar linhas com errors e salvar arquivo no banco de dados.
                     </Label>
                 </FormGroup>
 
@@ -92,7 +91,7 @@ export const ImportTransaction = () => {
                     type="submit"
                     disabled={!selectedFile || mutation.isPending}
                 >
-                    {mutation.isPending ? 'Uploading...' : 'Upload and Import'}
+                    {mutation.isPending ? 'Enviando...' : 'Enviar'}
                 </Button>
             </Form>
 
