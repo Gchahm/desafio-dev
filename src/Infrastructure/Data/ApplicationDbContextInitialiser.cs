@@ -14,7 +14,6 @@ public static class InitialiserExtensions
         var initialiser = scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitialiser>();
 
         await initialiser.InitialiseAsync();
-        await initialiser.SeedAsync();
     }
 }
 
@@ -41,23 +40,5 @@ public class ApplicationDbContextInitialiser
             _logger.LogError(ex, "An error occurred while initialising the database.");
             throw;
         }
-    }
-
-    public async Task SeedAsync()
-    {
-        try
-        {
-            await TrySeedAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An error occurred while seeding the database.");
-            throw;
-        }
-    }
-
-    public Task TrySeedAsync()
-    {
-        return Task.CompletedTask;
     }
 }

@@ -10,9 +10,4 @@ public class FinancialTransactionRepository(ApplicationDbContext context) : IFin
     {
         await context.FinancialTransactions.AddAsync(transaction, cancellationToken);
     }
-
-    public async Task AddRangeAsync(IEnumerable<FinancialTransaction> transactions, CancellationToken cancellationToken)
-    {
-        await context.FinancialTransactions.AddRangeAsync(transactions, cancellationToken);
-    }
 }
