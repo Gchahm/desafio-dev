@@ -1,11 +1,15 @@
 import React, { Component } from 'react';
-import followIfLoginRedirect from './api-authorization/followIfLoginRedirect';
-import { WeatherForecastsClient } from '../web-api-client.ts';
+import { WeatherForecastsClient, WeatherForecast } from '../web-api-client';
 
-export class FetchData extends Component {
+interface FetchDataState {
+  forecasts: WeatherForecast[];
+  loading: boolean;
+}
+
+export class FetchData extends Component<{}, FetchDataState> {
   static displayName = FetchData.name;
 
-  constructor(props) {
+  constructor(props: {}) {
     super(props);
     this.state = { forecasts: [], loading: true };
   }
@@ -14,7 +18,7 @@ export class FetchData extends Component {
     this.populateWeatherData();
   }
 
-  static renderForecastsTable(forecasts) {
+  static renderForecastsTable(forecasts: WeatherForecast[]) {
     return (
       <table className="table table-striped" aria-labelledby="tableLabel">
         <thead>
@@ -27,8 +31,8 @@ export class FetchData extends Component {
         </thead>
         <tbody>
           {forecasts.map(forecast =>
-            <tr key={forecast.date}>
-              <td>{new Date(forecast.date).toLocaleDateString()}</td>
+            <tr key={forecast.date?.toString()}>
+              <td>{forecast.date ? new Date(forecast.date).toLocaleDateString() : ''}</td>
               <td>{forecast.temperatureC}</td>
               <td>{forecast.temperatureF}</td>
               <td>{forecast.summary}</td>
@@ -61,7 +65,6 @@ export class FetchData extends Component {
 
   async populateWeatherDataOld() {
     const response = await fetch('weatherforecast');
-    followIfLoginRedirect(response);
     const data = await response.json();
     this.setState({ forecasts: data, loading: false });
   }

@@ -9,6 +9,65 @@
 
 import followIfLoginRedirect from './components/api-authorization/followIfLoginRedirect';
 
+export class TransactionsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    importCnabFile(file: FileParameter | null | undefined): Promise<CnabImportResult> {
+        let url_ = this.baseUrl + "/api/Transactions/import";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (file !== null && file !== undefined)
+            content_.append("file", file.data, file.fileName ? file.fileName : "file");
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processImportCnabFile(_response);
+        });
+    }
+
+    protected processImportCnabFile(response: Response): Promise<CnabImportResult> {
+        followIfLoginRedirect(response);
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = CnabImportResult.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result400 = resultData400 !== undefined ? resultData400 : null as any;
+    
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<CnabImportResult>(null as any);
+    }
+}
+
 export class WeatherForecastsClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -62,6 +121,70 @@ export class WeatherForecastsClient {
     }
 }
 
+export class CnabImportResult implements ICnabImportResult {
+    totalLines?: number;
+    successfulImports?: number;
+    failedImports?: number;
+    storesProcessed?: number;
+    errors?: string[];
+    isSuccess?: boolean;
+
+    constructor(data?: ICnabImportResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.totalLines = _data["totalLines"];
+            this.successfulImports = _data["successfulImports"];
+            this.failedImports = _data["failedImports"];
+            this.storesProcessed = _data["storesProcessed"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+            this.isSuccess = _data["isSuccess"];
+        }
+    }
+
+    static fromJS(data: any): CnabImportResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new CnabImportResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["totalLines"] = this.totalLines;
+        data["successfulImports"] = this.successfulImports;
+        data["failedImports"] = this.failedImports;
+        data["storesProcessed"] = this.storesProcessed;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        data["isSuccess"] = this.isSuccess;
+        return data;
+    }
+}
+
+export interface ICnabImportResult {
+    totalLines?: number;
+    successfulImports?: number;
+    failedImports?: number;
+    storesProcessed?: number;
+    errors?: string[];
+    isSuccess?: boolean;
+}
+
 export class WeatherForecast implements IWeatherForecast {
     date?: Date;
     temperatureC?: number;
@@ -108,6 +231,11 @@ export interface IWeatherForecast {
     temperatureC?: number;
     temperatureF?: number;
     summary?: string;
+}
+
+export interface FileParameter {
+    data: any;
+    fileName: string;
 }
 
 export class SwaggerException extends Error {
