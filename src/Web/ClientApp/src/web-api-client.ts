@@ -175,7 +175,6 @@ export interface IStoreDto {
 }
 
 export class TransactionDto implements ITransactionDto {
-    id?: number;
     description?: string;
     nature?: string;
     date?: Date;
@@ -196,7 +195,6 @@ export class TransactionDto implements ITransactionDto {
 
     init(_data?: any) {
         if (_data) {
-            this.id = _data["id"];
             this.description = _data["description"];
             this.nature = _data["nature"];
             this.date = _data["date"] ? new Date(_data["date"].toString()) : undefined as any;
@@ -217,7 +215,6 @@ export class TransactionDto implements ITransactionDto {
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
-        data["id"] = this.id;
         data["description"] = this.description;
         data["nature"] = this.nature;
         data["date"] = this.date ? this.date.toISOString() : undefined as any;
@@ -231,7 +228,6 @@ export class TransactionDto implements ITransactionDto {
 }
 
 export interface ITransactionDto {
-    id?: number;
     description?: string;
     nature?: string;
     date?: Date;

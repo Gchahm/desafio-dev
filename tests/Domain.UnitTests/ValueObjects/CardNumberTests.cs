@@ -89,36 +89,6 @@ public class CardNumberTests
     #region Formatting Tests
 
     [Test]
-    public void ToMaskedString_ShouldMaskAllButLastFourDigits()
-    {
-        // Arrange
-        var cardNumber = CardNumber.Create("123456789012");
-        var expectedMasked = "****-****-9012";
-
-        // Act
-        var masked = cardNumber.ToMaskedString();
-
-        // Assert
-        masked.ShouldBe(expectedMasked);
-    }
-
-    [TestCase("123456789012", "****-****-9012")]
-    [TestCase("000000001234", "****-****-1234")]
-    [TestCase("999999995678", "****-****-5678")]
-    [TestCase("111111110000", "****-****-0000")]
-    public void ToMaskedString_WithDifferentCardNumbers_ShouldMaskCorrectly(string cardNum, string expectedMasked)
-    {
-        // Arrange
-        var cardNumber = CardNumber.Create(cardNum);
-
-        // Act
-        var masked = cardNumber.ToMaskedString();
-
-        // Assert
-        masked.ShouldBe(expectedMasked);
-    }
-
-    [Test]
     public void ToFormattedString_ShouldReturnFormattedCardNumber()
     {
         // Arrange
@@ -256,68 +226,6 @@ public class CardNumberTests
         // Assert
         cardNumber.ShouldNotBeNull();
         cardNumber.Value.ShouldBe(allNines);
-    }
-
-    [Test]
-    public void ToMaskedString_WithAllZerosInLastFour_ShouldShowZeros()
-    {
-        // Arrange
-        var cardNumber = CardNumber.Create("123456780000");
-
-        // Act
-        var masked = cardNumber.ToMaskedString();
-
-        // Assert
-        masked.ShouldBe("****-****-0000");
-    }
-
-    [Test]
-    public void ToFormattedString_AndToMaskedString_ShouldHaveSameStructure()
-    {
-        // Arrange
-        var cardNumber = CardNumber.Create("123456789012");
-
-        // Act
-        var formatted = cardNumber.ToFormattedString();
-        var masked = cardNumber.ToMaskedString();
-
-        // Assert
-        formatted.Length.ShouldBe(masked.Length);
-        formatted.Count(c => c == '-').ShouldBe(masked.Count(c => c == '-'));
-    }
-
-    #endregion
-
-    #region Security and Privacy Tests
-
-    [Test]
-    public void ToMaskedString_ShouldNotRevealSensitiveDigits()
-    {
-        // Arrange
-        var cardNumber = CardNumber.Create("123456789012");
-
-        // Act
-        var masked = cardNumber.ToMaskedString();
-
-        // Assert
-        masked.ShouldNotContain("1234");
-        masked.ShouldNotContain("5678");
-        masked.ShouldContain("9012");
-        masked.ShouldContain("****");
-    }
-
-    [Test]
-    public void ToMaskedString_ConsistentMasking()
-    {
-        // Arrange
-        var cardNumber = CardNumber.Create("123456789012");
-
-        // Act
-        var masked1 = cardNumber.ToMaskedString();
-        var masked2 = cardNumber.ToMaskedString();
-
-        // Assert
-        masked1.ShouldBe(masked2, "masking should be consistent");
     }
 
     #endregion

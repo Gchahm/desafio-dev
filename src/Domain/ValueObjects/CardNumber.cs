@@ -30,15 +30,6 @@ public sealed class CardNumber
     }
 
     /// <summary>
-    /// Returns a masked version of the card number (showing only last 4 digits)
-    /// </summary>
-    /// <returns>Masked card number (e.g., ****-****-1234)</returns>
-    public string ToMaskedString()
-    {
-        return $"****-****-{Value.Substring(8, 4)}";
-    }
-
-    /// <summary>
     /// Returns a formatted card number (####-####-####)
     /// </summary>
     public string ToFormattedString()

@@ -8,11 +8,6 @@ namespace DesafioDev.Application.Transactions.Queries.GetStoreTransactions;
 public class TransactionDto
 {
     /// <summary>
-    /// Transaction ID
-    /// </summary>
-    public int Id { get; init; }
-
-    /// <summary>
     /// Type description (e.g., "Debit", "Credit")
     /// </summary>
     public string Description { get; init; } = string.Empty;
@@ -54,13 +49,12 @@ public class TransactionDto
 
     public static TransactionDto FromEntity(FinancialTransaction t) => new()
     {
-        Id = t.Id,
         Description = t.Description,
         Nature = t.Nature.ToString(),
         Date = t.Date.ToDateTime(t.Time),
         SignedAmount = t.GetSignedAmount(),
         Cpf = t.Cpf.ToFormattedString(),
-        CardNumber = t.Card.ToMaskedString(),
+        CardNumber = t.Card.ToFormattedString(),
         CreatedAt = t.CreatedAt
     };
 }
