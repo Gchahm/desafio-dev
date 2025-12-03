@@ -61,8 +61,12 @@ export class TransactionsClient {
         return Promise.resolve<StoreDto[]>(null as any);
     }
 
-    importCnabFile(file: FileParameter | null | undefined): Promise<CnabImportResult> {
-        let url_ = this.baseUrl + "/api/Transactions/import";
+    importCnabFile(ignoreErrors: boolean, file: FileParameter | null | undefined): Promise<CnabImportResult> {
+        let url_ = this.baseUrl + "/api/Transactions/import?";
+        if (ignoreErrors === undefined || ignoreErrors === null)
+            throw new globalThis.Error("The parameter 'ignoreErrors' must be defined and cannot be null.");
+        else
+            url_ += "ignoreErrors=" + encodeURIComponent("" + ignoreErrors) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = new FormData();
@@ -240,9 +244,8 @@ export interface ITransactionDto {
 
 export class CnabImportResult implements ICnabImportResult {
     totalLines?: number;
-    successfulImports?: number;
-    failedImports?: number;
-    storesProcessed?: number;
+    validLines?: number;
+    invalidLines?: number;
     errors?: string[];
     isSuccess?: boolean;
 
@@ -258,9 +261,8 @@ export class CnabImportResult implements ICnabImportResult {
     init(_data?: any) {
         if (_data) {
             this.totalLines = _data["totalLines"];
-            this.successfulImports = _data["successfulImports"];
-            this.failedImports = _data["failedImports"];
-            this.storesProcessed = _data["storesProcessed"];
+            this.validLines = _data["validLines"];
+            this.invalidLines = _data["invalidLines"];
             if (Array.isArray(_data["errors"])) {
                 this.errors = [] as any;
                 for (let item of _data["errors"])
@@ -280,9 +282,8 @@ export class CnabImportResult implements ICnabImportResult {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["totalLines"] = this.totalLines;
-        data["successfulImports"] = this.successfulImports;
-        data["failedImports"] = this.failedImports;
-        data["storesProcessed"] = this.storesProcessed;
+        data["validLines"] = this.validLines;
+        data["invalidLines"] = this.invalidLines;
         if (Array.isArray(this.errors)) {
             data["errors"] = [];
             for (let item of this.errors)
@@ -295,9 +296,8 @@ export class CnabImportResult implements ICnabImportResult {
 
 export interface ICnabImportResult {
     totalLines?: number;
-    successfulImports?: number;
-    failedImports?: number;
-    storesProcessed?: number;
+    validLines?: number;
+    invalidLines?: number;
     errors?: string[];
     isSuccess?: boolean;
 }

@@ -35,6 +35,17 @@
           "Transactions"
         ],
         "operationId": "ImportCnabFile",
+        "parameters": [
+          {
+            "name": "ignoreErrors",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            },
+            "x-position": 1
+          }
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -150,15 +161,11 @@
             "type": "integer",
             "format": "int32"
           },
-          "successfulImports": {
+          "validLines": {
             "type": "integer",
             "format": "int32"
           },
-          "failedImports": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "storesProcessed": {
+          "invalidLines": {
             "type": "integer",
             "format": "int32"
           },

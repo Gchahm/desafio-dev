@@ -1,4 +1,4 @@
-namespace DesafioDev.Application.Common.Models;
+namespace DesafioDev.Application.Transactions.Commands.ImportCnabFile;
 
 /// <summary>
 /// Result of a CNAB file import operation
@@ -13,17 +13,12 @@ public record CnabImportResult
     /// <summary>
     /// Number of transactions successfully imported
     /// </summary>
-    public int SuccessfulImports { get; init; }
+    public int ValidLines { get; init; }
 
     /// <summary>
     /// Number of transactions that failed to import
     /// </summary>
-    public int FailedImports { get; init; }
-
-    /// <summary>
-    /// Number of stores created or updated
-    /// </summary>
-    public int StoresProcessed { get; init; }
+    public int InvalidLines { get; init; }
 
     /// <summary>
     /// List of error messages for failed imports
@@ -33,5 +28,5 @@ public record CnabImportResult
     /// <summary>
     /// Indicates if the import was completely successful
     /// </summary>
-    public bool IsSuccess => FailedImports == 0;
+    public bool IsSuccess { get; init; }
 }

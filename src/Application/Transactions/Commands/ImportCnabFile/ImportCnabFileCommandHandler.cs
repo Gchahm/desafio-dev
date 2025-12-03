@@ -40,7 +40,6 @@ public class ImportCnabFileCommandHandler(
 
             // Group transactions by store
             var transactionsByStore = parsedLines.GroupBy(line => line.StoreName.Trim());
-            var storesProcessed = new HashSet<string>();
 
             foreach (var storeGroup in transactionsByStore)
             {
@@ -58,8 +57,6 @@ public class ImportCnabFileCommandHandler(
                         storeOwner,
                         cancellationToken);
 
-                    storesProcessed.Add(storeName);
-
                     // Process each transaction for this store
                     foreach (var lineData in storeGroup)
                     {
@@ -67,12 +64,12 @@ public class ImportCnabFileCommandHandler(
                         {
                             var transaction = CreateTransaction(lineData, store);
                             await transactions.AddAsync(transaction, cancellationToken);
-                            result = result with { SuccessfulImports = result.SuccessfulImports + 1 };
+                            result = result with { ValidLines = result.ValidLines + 1 };
                         }
                         catch (Exception ex)
                         {
                             errors.Add($"Store '{storeName}': Failed to create transaction - {ex.Message}");
-                            result = result with { FailedImports = result.FailedImports + 1 };
+                            result = result with { InvalidLines = result.InvalidLines + 1 };
                         }
                     }
                 }
@@ -81,21 +78,21 @@ public class ImportCnabFileCommandHandler(
                     errors.Add($"Store '{storeName}': {ex.Message}");
                     result = result with
                     {
-                        FailedImports = result.FailedImports + storeGroup.Count()
+                        InvalidLines = result.InvalidLines + storeGroup.Count()
                     };
                 }
             }
 
             result = result with
             {
-                StoresProcessed = storesProcessed.Count,
                 Errors = errors
             };
 
             // Save all changes to database
-            if (result.SuccessfulImports > 0)
+            if (result.ValidLines > 0 && (result.InvalidLines == 0 || request.IgnoreErrors))
             {
                 await uow.SaveChangesAsync(cancellationToken);
+                result = result with { IsSuccess = true };
             }
 
             return result;
@@ -106,7 +103,7 @@ public class ImportCnabFileCommandHandler(
             return result with
             {
                 Errors = errors,
-                FailedImports = result.TotalLines - result.SuccessfulImports
+                InvalidLines = result.TotalLines - result.ValidLines
             };
         }
     }
@@ -122,25 +119,16 @@ public class ImportCnabFileCommandHandler(
         // Try to find existing store by name
         var store = await stores.GetByNameAsync(storeName, cancellationToken);
 
-        if (store == null)
-        {
-            // Create new store
-            store = new Store
-            {
-                Name = storeName,
-                OwnerName = storeOwner
-            };
+        if (store != null) return store;
 
-            await stores.AddAsync(store, cancellationToken);
-
-            // Save to get the store ID immediately
-            await uow.SaveChangesAsync(cancellationToken);
-        }
-        else if (store.OwnerName != storeOwner)
+        // Create new store
+        store = new Store
         {
-            // Update owner name if changed
-            store.OwnerName = storeOwner;
-        }
+            Name = storeName,
+            OwnerName = storeOwner
+        };
+
+        await stores.AddAsync(store, cancellationToken);
 
         return store;
     }
@@ -179,7 +167,6 @@ public class ImportCnabFileCommandHandler(
             Cpf = cpf,
             Card = card,
             Store = store,
-            StoreId = store.Id,
             CreatedAt = DateTime.UtcNow
         };
     }

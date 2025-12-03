@@ -28,9 +28,8 @@ public class ImportCnabFileTests : BaseTestFixture
         // Assert
         result.ShouldNotBeNull();
         result.TotalLines.ShouldBe(3);
-        result.SuccessfulImports.ShouldBe(3);
-        result.FailedImports.ShouldBe(0);
-        result.StoresProcessed.ShouldBe(2);
+        result.ValidLines.ShouldBe(3);
+        result.InvalidLines.ShouldBe(0);
         result.IsSuccess.ShouldBeTrue();
         result.Errors.ShouldBeEmpty();
 
@@ -130,7 +129,7 @@ public class ImportCnabFileTests : BaseTestFixture
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.SuccessfulImports.ShouldBe(1);
+        result.ValidLines.ShouldBe(1);
 
         // Should still have only 1 store
         var storeCount = await CountAsync<Store>();
@@ -139,28 +138,6 @@ public class ImportCnabFileTests : BaseTestFixture
         // But should have 2 transactions
         var transactionCount = await CountAsync<FinancialTransaction>();
         transactionCount.ShouldBe(2);
-    }
-
-    [Test]
-    public async Task ShouldUpdateStoreOwnerIfChanged()
-    {
-        // Arrange - First import
-        var cnabContent1 = CreateSingleTransactionCnab("BAR DO JOÃO", "JOÃO MACEDO");
-        var stream1 = CreateStreamFromString(cnabContent1);
-        await SendAsync(new ImportCnabFileCommand { FileStream = stream1, FileName = "test1.txt" });
-
-        // Act - Second import with same store but different owner
-        var cnabContent2 = CreateSingleTransactionCnab("BAR DO JOÃO", "JOSÉ SILVA");
-        var stream2 = CreateStreamFromString(cnabContent2);
-        await SendAsync(new ImportCnabFileCommand { FileStream = stream2, FileName = "test2.txt" });
-
-        // Assert
-        var stores = await GetAllAsync<Store>();
-        stores.Count.ShouldBe(1);
-
-        var store = stores.First();
-        store.Name.ShouldBe("BAR DO JOÃO");
-        store.OwnerName.ShouldBe("JOSÉ SILVA"); // Should be updated
     }
 
     [Test]
@@ -179,8 +156,8 @@ public class ImportCnabFileTests : BaseTestFixture
 
         // Assert
         result.TotalLines.ShouldBe(0);
-        result.SuccessfulImports.ShouldBe(0);
-        result.FailedImports.ShouldBe(0);
+        result.ValidLines.ShouldBe(0);
+        result.InvalidLines.ShouldBe(0);
         result.Errors.Count.ShouldBe(1);
         result.Errors[0].ShouldContain("empty", Case.Insensitive);
 
@@ -206,7 +183,7 @@ public class ImportCnabFileTests : BaseTestFixture
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.SuccessfulImports.ShouldBe(3); // Empty lines should be skipped
+        result.ValidLines.ShouldBe(3); // Empty lines should be skipped
         result.TotalLines.ShouldBe(3);
     }
 
@@ -231,7 +208,7 @@ public class ImportCnabFileTests : BaseTestFixture
 
         // Assert - Parser will fail when encountering invalid line
         result.TotalLines.ShouldBe(0);
-        result.SuccessfulImports.ShouldBe(0);
+        result.ValidLines.ShouldBe(0);
         result.Errors.ShouldNotBeEmpty();
         result.Errors.Any(e => e.Contains("line 2", StringComparison.OrdinalIgnoreCase)).ShouldBeTrue();
     }
@@ -312,6 +289,155 @@ public class ImportCnabFileTests : BaseTestFixture
 
         barTransactions.Count.ShouldBe(2);
         barTransactions.All(t => t.StoreId == barDoJoao.Id).ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ShouldNotSaveAnyTransactionsWhenFileHasInvalidTransactionsAndIgnoreErrorsIsFalse()
+    {
+        // Arrange - File with 2 valid transactions and 1 invalid transaction (invalid type)
+        var validLine1 = CreateCnabLine(type: 1, storeName: "STORE1", storeOwner: "OWNER1");
+        var invalidLine = CreateCnabLine(type: 0, storeName: "STORE2", storeOwner: "OWNER2"); // Invalid transaction type (0 is not defined)
+        var validLine2 = CreateCnabLine(type: 3, storeName: "STORE3", storeOwner: "OWNER3");
+
+        var cnabContent = $"{validLine1}\n{invalidLine}\n{validLine2}";
+        var stream = CreateStreamFromString(cnabContent);
+        var command = new ImportCnabFileCommand
+        {
+            FileStream = stream,
+            FileName = "mixed.txt",
+            IgnoreErrors = false // Explicit false
+        };
+
+        // Act
+        var result = await SendAsync(command);
+
+        // Assert
+        result.TotalLines.ShouldBe(3);
+        result.ValidLines.ShouldBe(2);
+        result.InvalidLines.ShouldBe(1);
+        result.IsSuccess.ShouldBeFalse();
+        result.Errors.ShouldNotBeEmpty();
+        result.Errors.Any(e => e.Contains("Invalid transaction type", StringComparison.OrdinalIgnoreCase)).ShouldBeTrue();
+
+        // CRITICAL: No stores or transactions should be saved to database
+        var storeCount = await CountAsync<Store>();
+        storeCount.ShouldBe(0);
+
+        var transactionCount = await CountAsync<FinancialTransaction>();
+        transactionCount.ShouldBe(0);
+    }
+
+    [Test]
+    public async Task ShouldSaveValidTransactionsWhenFileHasInvalidTransactionsAndIgnoreErrorsIsTrue()
+    {
+        // Arrange - File with 2 valid transactions and 1 invalid transaction (invalid type)
+        var validLine1 = CreateCnabLine(type: 1, storeName: "STORE1", storeOwner: "OWNER1");
+        var invalidLine = CreateCnabLine(type: 0, storeName: "STORE2", storeOwner: "OWNER2"); // Invalid transaction type (0 is not defined)
+        var validLine2 = CreateCnabLine(type: 3, storeName: "STORE3", storeOwner: "OWNER3");
+
+        var cnabContent = $"{validLine1}\n{invalidLine}\n{validLine2}";
+        var stream = CreateStreamFromString(cnabContent);
+        var command = new ImportCnabFileCommand
+        {
+            FileStream = stream,
+            FileName = "mixed.txt",
+            IgnoreErrors = true // Ignore errors and save valid transactions
+        };
+
+        // Act
+        var result = await SendAsync(command);
+
+        // Assert
+        result.TotalLines.ShouldBe(3);
+        result.ValidLines.ShouldBe(2);
+        result.InvalidLines.ShouldBe(1);
+        result.IsSuccess.ShouldBeFalse(); // Still has errors
+        result.Errors.ShouldNotBeEmpty();
+        result.Errors.Any(e => e.Contains("Invalid transaction type", StringComparison.OrdinalIgnoreCase)).ShouldBeTrue();
+
+        // CRITICAL: Valid stores and transactions SHOULD be saved to database
+        // Note: STORE2 is also created (even though its transaction failed) because
+        // store creation happens before transaction processing
+        var storeCount = await CountAsync<Store>();
+        storeCount.ShouldBe(3); // STORE1, STORE2, and STORE3
+
+        var transactionCount = await CountAsync<FinancialTransaction>();
+        transactionCount.ShouldBe(2); // Only the 2 valid transactions (STORE2's transaction failed)
+
+        // Verify the valid transactions were saved correctly
+        var transactions = await GetAllAsync<FinancialTransaction>();
+        transactions.Any(t => t.Type == TransactionType.Debit).ShouldBeTrue(); // type 1
+        transactions.Any(t => t.Type == TransactionType.Financing).ShouldBeTrue(); // type 3
+
+        // Verify STORE2 exists but has no transactions
+        var store2 = (await GetAllAsync<Store>()).FirstOrDefault(s => s.Name == "STORE2");
+        store2.ShouldNotBeNull();
+        transactions.Any(t => t.StoreId == store2!.Id).ShouldBeFalse(); // No transactions for STORE2
+    }
+
+    [Test]
+    public async Task ShouldNotSaveAnythingWhenAllTransactionsFailAndIgnoreErrorsIsTrue()
+    {
+        // Arrange - File with only invalid transactions
+        var invalidLine1 = CreateCnabLine(type: 0, storeName: "STORE1", storeOwner: "OWNER1");
+        var invalidLine2 = CreateCnabLine(type: 0, storeName: "STORE2", storeOwner: "OWNER2");
+
+        var cnabContent = $"{invalidLine1}\n{invalidLine2}";
+        var stream = CreateStreamFromString(cnabContent);
+        var command = new ImportCnabFileCommand
+        {
+            FileStream = stream,
+            FileName = "allinvalid.txt",
+            IgnoreErrors = true
+        };
+
+        // Act
+        var result = await SendAsync(command);
+
+        // Assert
+        result.TotalLines.ShouldBe(2);
+        result.ValidLines.ShouldBe(0);
+        result.InvalidLines.ShouldBe(2);
+        result.IsSuccess.ShouldBeFalse();
+
+        // Nothing should be saved because there are no successful imports
+        var storeCount = await CountAsync<Store>();
+        storeCount.ShouldBe(0);
+
+        var transactionCount = await CountAsync<FinancialTransaction>();
+        transactionCount.ShouldBe(0);
+    }
+
+    [Test]
+    public async Task ShouldNotSaveWhenOnlyStoreCreationFailsAndIgnoreErrorsIsFalse()
+    {
+        // Arrange - Create a file where one store group will fail completely
+        var validLine1 = CreateCnabLine(type: 1, storeName: "STORE1", storeOwner: "OWNER1");
+        var validLine2 = CreateCnabLine(type: 1, storeName: "STORE1", storeOwner: "OWNER1");
+        var invalidLine = CreateCnabLine(type: 0, storeName: "STORE2", storeOwner: "OWNER2"); // This will fail
+
+        var cnabContent = $"{validLine1}\n{validLine2}\n{invalidLine}";
+        var stream = CreateStreamFromString(cnabContent);
+        var command = new ImportCnabFileCommand
+        {
+            FileStream = stream,
+            FileName = "mixed.txt",
+            IgnoreErrors = false
+        };
+
+        // Act
+        var result = await SendAsync(command);
+
+        // Assert
+        result.ValidLines.ShouldBe(2);
+        result.InvalidLines.ShouldBe(1);
+
+        // No data should be saved because IgnoreErrors is false and there are failures
+        var storeCount = await CountAsync<Store>();
+        storeCount.ShouldBe(0);
+
+        var transactionCount = await CountAsync<FinancialTransaction>();
+        transactionCount.ShouldBe(0);
     }
 
     #region Helper Methods

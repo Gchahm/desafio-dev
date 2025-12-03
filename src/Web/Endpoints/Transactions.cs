@@ -35,10 +35,13 @@ public class Transactions : EndpointGroupBase
     /// </summary>
     /// <param name="sender">MediatR sender</param>
     /// <param name="file">The CNAB file to import</param>
+    /// <param name="ignoreErrors">Save to database even if there are errors in the file</param>
     /// <returns>Import result with statistics</returns>
     public async Task<Results<Ok<CnabImportResult>, BadRequest<string>>> ImportCnabFile(
         ISender sender,
-        IFormFile file)
+        IFormFile file,
+        bool ignoreErrors
+    )
     {
         // Validate file
         if (file == null || file.Length == 0)
@@ -52,14 +55,16 @@ public class Transactions : EndpointGroupBase
 
         if (!allowedExtensions.Contains(fileExtension) && !string.IsNullOrEmpty(fileExtension))
         {
-            return TypedResults.BadRequest($"Invalid file type. Allowed types: {string.Join(", ", allowedExtensions.Where(e => !string.IsNullOrEmpty(e)))}");
+            return TypedResults.BadRequest(
+                $"Invalid file type. Allowed types: {string.Join(", ", allowedExtensions.Where(e => !string.IsNullOrEmpty(e)))}");
         }
 
         // Validate file size (max 10MB for safety)
         const long maxFileSize = 10 * 1024 * 1024; // 10MB
         if (file.Length > maxFileSize)
         {
-            return TypedResults.BadRequest($"File size exceeds maximum allowed size of {maxFileSize / (1024 * 1024)}MB");
+            return TypedResults.BadRequest(
+                $"File size exceeds maximum allowed size of {maxFileSize / (1024 * 1024)}MB");
         }
 
         try
@@ -70,7 +75,8 @@ public class Transactions : EndpointGroupBase
             var command = new ImportCnabFileCommand
             {
                 FileStream = stream,
-                FileName = file.FileName
+                FileName = file.FileName,
+                IgnoreErrors = ignoreErrors
             };
 
             var result = await sender.Send(command);

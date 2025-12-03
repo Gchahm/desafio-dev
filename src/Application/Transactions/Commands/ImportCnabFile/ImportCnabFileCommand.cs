@@ -16,4 +16,6 @@ public record ImportCnabFileCommand : IRequest<CnabImportResult>
     /// Original filename (for logging/tracking purposes)
     /// </summary>
     public string FileName { get; init; } = string.Empty;
+
+    public bool IgnoreErrors { get; set; } = false;
 }
