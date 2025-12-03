@@ -83,6 +83,15 @@ public partial class Testing
         return await context.Set<TEntity>().CountAsync();
     }
 
+    public static async Task<List<TEntity>> GetAllAsync<TEntity>() where TEntity : class
+    {
+        using var scope = _scopeFactory.CreateScope();
+
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        return await context.Set<TEntity>().ToListAsync();
+    }
+
     [OneTimeTearDown]
     public async Task RunAfterAnyTests()
     {
