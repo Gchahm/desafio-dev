@@ -2,18 +2,100 @@
 
 [![Tests](https://github.com/gchahm/desafio-dev/actions/workflows/tests.yml/badge.svg)](https://github.com/gchahm/desafio-dev/actions/workflows/tests.yml)
 
-This repository was created using the template from [jasontaylordev/CleanArchitecture](https://github.com/jasontaylordev/CleanArchitecture)
+# About
 
-## Development
+## Architecture
 
-This project is an ASP.NET Core application (C# 14 / .NET 10) that uses PostgreSQL as its database. Below are the steps to get a local development environment up and running.
+The code follows the Clean Architecture principles. Following the patterns defined
+by [Jason Taylor](https://jasontaylor.dev/clean-architecture-getting-started/) using
+his [template](https://github.com/jasontaylordev/CleanArchitecture)
+
+## Database
+The project uses PostgreSql as a database, using the code first approach for defining the database schema.  
+There are only two entities defined, FinantialTransaction and Store. They can be found in the Domain project.  
+The configuration of these entities is defined in the Infrastructure project.  
+
+## Endpoints
+
+### GET /api/Transactions
+
+Simple GET endpoint that returns all transactions group by store
+
+```json
+[
+  {
+    "id": 0,
+    "name": "string",
+    "ownerName": "string",
+    "transactions": [
+      {
+        "description": "string",
+        "nature": "string",
+        "date": "2025-12-04T16:00:31.319Z",
+        "time": "string",
+        "signedAmount": 0,
+        "cpf": "string",
+        "cardNumber": "string",
+        "createdAt": "2025-12-04T16:00:31.319Z"
+      }
+    ],
+    "totalBalance": 0
+  }
+]
+```
+
+### POST /api/Transactions/import
+
+Import transactions from a CNAB file, it takes ignoreErrors boolean parameter to ignore invalid lines
+
+**Functionality**
+This endpoint takes a file in the CNAB format, parses it and adds the transactions to the database.
+The system will not update the database if a line is invalid, but this behavior can be changed by passing the
+ignoreErrors parameter.
+
+The response is set in a way that the user is presented with a list of errors that occurred during the import process,
+effectively flagging which lines are not valid.
+
+**Response:**
+
+```json
+{
+  "totalLines": 0,
+  "validLines": 0,
+  "invalidLines": 0,
+  "errors": [
+    "string"
+  ],
+  "isSuccess": true
+}
+```
+
+## Front end
+
+The front end is automatically built and served by the Web application when it starts.  
+It is a simple SPA built with React and Bootstrap.  
+BE interface clients are automatically generated using OpenAPI and NSwag code generator.
+
+
+## Tests
+There are three projects for testing the solution:
+- **Domain.UnitTests** → Tests for the domain ie Value Objects, tests.
+- **Application.UnitTests** → Tests for the application in our case the Parser service.
+- **Application.FunctionalTests** → Tests the actual functionality testing mediatr as an application with database calls and pipeline 
+
+# Development
+
+This project is an ASP.NET Core application (C# 14 / .NET 10) that uses PostgreSQL as its database. Below are the steps
+to get a local development environment up and running.
 
 ### Prerequisites
+
 - .NET SDK 10.x installed (verify with: `dotnet --version`)
 - Docker Desktop (or Docker Engine) with Docker Compose
 - Git
 
 ### Clone and restore
+
 ```bash
 git clone https://github.com/<your-org-or-user>/desafio-dev.git
 cd desafio-dev
@@ -21,64 +103,79 @@ dotnet restore
 ```
 
 ### Running the database (PostgreSQL) with Docker
+
 The repository includes a `docker-compose.yml` that provisions a PostgreSQL 17 instance with the following defaults:
+
 - Host port: `5432`
 - Database: `DesafioDevDb`
 - Username: `admin`
 - Password: `password`
 
 Start only the database service:
+
 ```bash
 docker compose up db -d
 ```
 
 Stop the database:
+
 ```bash
 docker compose stop db
 ```
 
 ### Configure the connection string
+
 The app reads the connection string `ConnectionStrings:DesafioDevDb`.
 
 Options:
-- When running the Web app inside Docker Compose, the `web` service receives the connection string via environment variables (already set in `docker-compose.yml`). No extra setup is needed.
-- When running the Web app on your host (dotnet CLI), point it to the Docker database using this connection string in `src/Web/appsettings.Development.json` or via environment variable:
-  - JSON (appsettings.Development.json):
-    ```json
-    {
-      "ConnectionStrings": {
-        "DesafioDevDb": "Server=localhost;Port=5432;Database=DesafioDevDb;Username=admin;Password=password;"
+
+- When running the Web app inside Docker Compose, the `web` service receives the connection string via environment
+  variables (already set in `docker-compose.yml`). No extra setup is needed.
+- When running the Web app on your host (dotnet CLI), point it to the Docker database using this connection string in
+  `src/Web/appsettings.Development.json` or via environment variable:
+    - JSON (appsettings.Development.json):
+      ```json
+      {
+        "ConnectionStrings": {
+          "DesafioDevDb": "Server=localhost;Port=5432;Database=DesafioDevDb;Username=admin;Password=password;"
+        }
       }
-    }
-    ```
-  - Environment variable (macOS/Linux):
-    ```bash
-    export ConnectionStrings__DesafioDevDb="Server=localhost;Port=5432;Database=DesafioDevDb;Username=admin;Password=password;"
-    ```
+      ```
+    - Environment variable (macOS/Linux):
+      ```bash
+      export ConnectionStrings__DesafioDevDb="Server=localhost;Port=5432;Database=DesafioDevDb;Username=admin;Password=password;"
+      ```
 
 ### Run the Web application (development)
 
 #### Using Docker Compose (runs both Web and DB):
+
   ```bash
   docker compose up
   ```
-  The Web app will listen on http://localhost:8080 (health check: `http://localhost:8080/health`).
+
+The Web app will listen on http://localhost:8080 (health check: `http://localhost:8080/health`).
 
 #### Using the .NET CLI on your host (DB via Docker):
+
   ```bash
   dotnet build
   dotnet run --project src/Web
   ```
-  By default, ASP.NET Core uses the `Development` environment. If needed:
+
+By default, ASP.NET Core uses the `Development` environment. If needed:
+
   ```bash
   export ASPNETCORE_ENVIRONMENT=Development
   ```
 
 ### Database migrations
 
-Migrations are run automatically when the application starts. You can check this [documnet](https://jasontaylor.dev/ef-core-database-initialisation-strategies/) for more details.
+Migrations are run automatically when the application starts. You can check
+this [documnet](https://jasontaylor.dev/ef-core-database-initialisation-strategies/) for more details.
 
 #z## Useful commands
+
 - List SDKs: `dotnet --list-sdks`
 - Clean build artifacts: `dotnet clean`
 - Restore packages: `dotnet restore`
@@ -86,11 +183,13 @@ Migrations are run automatically when the application starts. You can check this
 ## Testing application
 
 Run all tests:
+
 ```bash
 dotnet test
 ```
 
 Spin up the full stack with Docker (Web + DB):
+
 ```bash
 docker compose up
 ```
@@ -100,14 +199,15 @@ docker compose up
 You can explore the API using Swagger UI or the raw OpenAPI specification:
 
 - When running with the .NET CLI on your host:
-  - Swagger UI: https://localhost:44447/api/
-  - Raw spec (JSON): https://localhost:44447/api/specification.json
+    - Swagger UI: https://localhost:44447/api/
+    - Raw spec (JSON): https://localhost:44447/api/specification.json
 
 - When running with Docker Compose (default web port 8080):
-  - Swagger UI: http://localhost:8080/api/
-  - Raw spec (JSON): http://localhost:8080/api/specification.json
+    - Swagger UI: http://localhost:8080/api/
+    - Raw spec (JSON): http://localhost:8080/api/specification.json
 
 - From the repository (without running the app):
-  - Open the static file at `src/Web/wwwroot/api/specification.json`.
+    - Open the static file at `src/Web/wwwroot/api/specification.json`.
 
-Tip: If your local port differs (e.g., due to `launchSettings.json` changes), check the application startup output for the exact URLs and replace the port accordingly.
+Tip: If your local port differs (e.g., due to `launchSettings.json` changes), check the application startup output for
+the exact URLs and replace the port accordingly.
