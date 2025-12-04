@@ -58,14 +58,3 @@ jobs:
         with:
           recreate: true
           path: code-coverage-results.md
-
-      - name: Create Coverage Badge
-        uses: simon-k/dotnet-code-coverage-badge@v1.0.0
-        if: github.ref == 'refs/heads/main'
-        with:
-          label: coverage
-          color: brightgreen
-          path: coverage/merged/Cobertura.xml
-          gist-filename: desafio-dev-code-coverage.json
-          gist-id: ${{ secrets.GIST_ID }}
-          gist-auth-token: ${{ secrets.GIST_AUTH_TOKEN }}
