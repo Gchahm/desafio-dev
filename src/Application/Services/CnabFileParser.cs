@@ -68,7 +68,7 @@ public class CnabFileParser : ICnabFileParser
             CnabLineData parsedLine;
             try
             {
-                parsedLine = ParseLine(line);
+                parsedLine = ParseLine(line, lineNumber);
             }
             catch (Exception ex)
             {
@@ -84,7 +84,7 @@ public class CnabFileParser : ICnabFileParser
     /// <summary>
     /// Parses a single CNAB line
     /// </summary>
-    public CnabLineData ParseLine(string line)
+    public CnabLineData ParseLine(string line, int lineNumber = 0)
     {
         if (line == null)
             throw new ArgumentNullException(nameof(line));
@@ -98,6 +98,7 @@ public class CnabFileParser : ICnabFileParser
         {
             return new CnabLineData
             {
+                LineNumber = lineNumber,
                 Type = ParseInt(line, TypeStart, TypeLength, "Type"),
                 Date = ParseString(line, DateStart, DateLength),
                 ValueInCents = ParseLong(line, ValueStart, ValueLength, "Value"),

@@ -68,7 +68,7 @@ public class ImportCnabFileCommandHandler(
                         }
                         catch (Exception ex)
                         {
-                            errors.Add($"Store '{storeName}': Failed to create transaction - {ex.Message}");
+                            errors.Add($"Line '{lineData.LineNumber + 1}': Failed to create transaction - {ex.Message}");
                             result = result with { InvalidLines = result.InvalidLines + 1 };
                         }
                     }

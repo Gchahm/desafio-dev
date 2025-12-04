@@ -13,11 +13,4 @@ public interface ICnabFileParser
     /// <param name="fileStream">The CNAB file stream to parse</param>
     /// <returns>Enumerable of parsed CNAB line data</returns>
     IEnumerable<CnabLineData> ParseFile(Stream fileStream);
-
-    /// <summary>
-    /// Parses a single line from the CNAB file
-    /// </summary>
-    /// <param name="line">The CNAB line to parse (must be exactly 81 characters)</param>
-    /// <returns>Parsed CNAB line data</returns>
-    CnabLineData ParseLine(string line);
 }

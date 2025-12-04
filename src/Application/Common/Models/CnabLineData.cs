@@ -9,6 +9,10 @@ public record CnabLineData
     /// <summary>
     /// Transaction type (1-9)
     /// </summary>
+    public int LineNumber { get; init; }
+    /// <summary>
+    /// Transaction type (1-9)
+    /// </summary>
     public int Type { get; init; }
 
     /// <summary>
